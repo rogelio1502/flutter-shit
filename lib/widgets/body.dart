@@ -3,10 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:state_management/provider/signal_mode.dart';
 import 'package:state_management/provider/user_provider.dart';
 import 'package:state_management/models/user.dart';
-import 'package:state_management/secure_storage/secure_storage.dart';
 
 class Body extends StatefulWidget {
-  Body({Key? key}) : super(key: key);
+  const Body({Key? key}) : super(key: key);
 
   @override
   State<Body> createState() => _BodyState();
@@ -15,16 +14,12 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   // late  userProvider;
   final _formKey = GlobalKey<FormState>();
-  final userProvider = UserProvider();
+  late SignalMode signal;
+  late UserProvider userProvider;
+  TextEditingController nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-    final signal = Provider.of<SignalMode>(context);
-    // final userProvider = Provider.of<UserProvider>(context);
-    // userModel.provider = user;
-    print("Hola mundo");
-
     return Center(
       child: Column(
         children: [
@@ -33,7 +28,9 @@ class _BodyState extends State<Body> {
             style: const TextStyle(fontSize: 20),
           ),
           Text(
-            userProvider.userName,
+            (userProvider.user?.name == "" || userProvider.user?.name == null)
+                ? "Dame tu nombre"
+                : userProvider.user!.name,
             style: const TextStyle(fontSize: 20),
           ),
           Form(
@@ -41,6 +38,7 @@ class _BodyState extends State<Body> {
             child: Column(
               children: [
                 TextFormField(
+                  controller: nameController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     label: Text("Tu nombre"),
@@ -48,7 +46,7 @@ class _BodyState extends State<Body> {
                   onSaved: (newValue) {
                     // user.name = newValue.toString();
                     userProvider.user = User(name: newValue.toString());
-                    userProvider.user?.saveData();
+                    nameController.text = "";
                   },
                 ),
                 ElevatedButton(
@@ -66,12 +64,26 @@ class _BodyState extends State<Body> {
   }
 
   @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDep543543endencies
+    super.didChangeDependencies();
+    userProvider = Provider.of<UserProvider>(context);
+    signal = Provider.of<SignalMode>(context);
+  }
+
+  @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    // SecureStorage.readData('userName').then((value) {
-    //   userProvider.user = User(
-    //     name: value ?? '',
-    //   );
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      userProvider.obtainUsername();
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    nameController.dispose();
   }
 }

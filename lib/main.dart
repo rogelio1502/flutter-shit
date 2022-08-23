@@ -11,14 +11,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (_) => SignalMode(),
-        child: ChangeNotifierProvider(
-          create: (_) => UserProvider(),
-          child: const MaterialApp(
-            title: 'Provider',
-            home: Home(),
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (_) => SignalMode(),
+            lazy: false,
           ),
+          ChangeNotifierProvider(
+            create: (_) => UserProvider(),
+            lazy: false,
+          ),
+        ],
+        child: Builder(
+          builder: (context) {
+            return const MaterialApp(
+              title: 'Provider',
+              home: Home(),
+            );
+          },
         ));
   }
 }
